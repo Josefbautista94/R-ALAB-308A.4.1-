@@ -1,10 +1,13 @@
 {
+  "homepage": "https://josefbautista94.github.io/R-ALAB-308A.4.1-",
   "name": "ajax-fetch-and-axios-lab-template",
   "version": "1.0.0",
   "description": "",
   "scripts": {
- "start": "npx parcel index.html --open",
-"build": "npx parcel build index.html"
+    "start": "npx parcel index.html --open",
+    "build": "npx parcel build index.html",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@popperjs/core": "2.11.7",
@@ -15,7 +18,9 @@
   },
   "devDependencies": {
     "@babel/core": "7.2.0",
+    "gh-pages": "^6.3.0",
     "parcel": "^2.14.2",
+    "svgo": "^3.3.2",
     "typescript": "4.4.4"
   },
   "resolutions": {
