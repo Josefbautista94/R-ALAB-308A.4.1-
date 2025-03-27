@@ -12,16 +12,42 @@ const progressBar = document.getElementById("progressBar");
 const getFavouritesBtn = document.getElementById("getFavouritesBtn");
 
 // Step 0: Store your API key here for reference and easy access.
-const API_KEY = import.meta.env.PUP_API_KEY;
+const API_KEY = "live_gg8mehf3me9mhlKCmwg2Q64GKLDw1LgZrFSMzBzSNB0i4LUFlGOLUhhQOIQhIjab";
+
 
 /**
- * 1. Create an async function "initialLoad" that does the following:
- * - Retrieve a list of breeds from the cat API using fetch().
- * - Create new <options> for each of these breeds, and append them to breedSelect.
- *  - Each option should have a value attribute equal to the id of the breed.
- *  - Each option should display text equal to the name of the breed.
- * This function should execute immediately.
+ * 1. Create an async function "initialLoad" that does the following:✅
+ * - Retrieve a list of breeds from the cat API using fetch().✅
+ * - Create new <options> for each of these breeds, and append them to breedSelect.✅
+ *  - Each option should have a value attribute equal to the id of the breed.✅
+ *  - Each option should display text equal to the name of the breed.✅
+ * This function should execute immediately.✅
  */
+
+async function initialLoad() {
+  try{
+
+  const response = await fetch("https://api.thedogapi.com/v1/breeds"); //This line sends an HTTP GET request to The Doggy API to retrieve a list of dog breeds.
+  // await pauses this line until the API responds.
+
+  const breeds = await response.json() //converts the raw response into usable JavaScript (an array of breed objects).
+
+  console.log("Breeds", breeds)
+
+  breeds.forEach((breed)=>{ // This loop goes through each breed object in the breeds array.
+    const option = document.createElement("option"); // creating a new <option> element in JavaScript (for use in a dropdown menu).
+
+
+    option.value = breed.id; // This is what will be passed when someone selects it in the dropdown.
+    option.textContent = breed.name; // Sets the visible text in the dropdown to the name of the breed in example Cane Corso
+    breedSelect.appendChild(option) // apppening it to the parent breedSelect
+  })
+} catch (error) {
+  console.error("Error fetching breeds:", error); // throwing an error if something goes wrong
+}
+}
+
+initialLoad();
 
 /**
  * 2. Create an event handler for breedSelect that does the following:
