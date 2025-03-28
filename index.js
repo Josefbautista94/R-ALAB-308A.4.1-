@@ -34,7 +34,7 @@ axios.interceptors.response.use((response) => {
   const duration = endTime - response.config.metadata.startTime; // subtracts the previous recorded start time from the end time
   console.log(`Request Duration: ${duration} ms`);
   document.body.style.cursor = "default";
-  
+
   return response;
 },
   (error) => {
@@ -181,18 +181,18 @@ async function retrieveInfo(event) { // creating async function to add breeds ch
  */
 
 /**
- * 6. Next, we'll create a progress bar to indicate the request is in progress.
- * - The progressBar element has already been created for you.
- *  - You need only to modify its "width" style property to align with the request progress.
- * - In your request interceptor, set the width of the progressBar element to 0%.
- *  - This is to reset the progress with each request.
- * - Research the axios onDownloadProgress config option.
- * - Create a function "updateProgress" that receives a ProgressEvent object.
- *  - Pass this function to the axios onDownloadProgress config option in your event handler.
- * - console.log your ProgressEvent object within updateProgess, and familiarize yourself with its structure.
- *  - Update the progress of the request using the properties you are given.
- * - Note that we are not downloading a lot of data, so onDownloadProgress will likely only fire
- *   once or twice per request to this API. This is still a concept worth familiarizing yourself
+ * 6. Next, we'll create a progress bar to indicate the request is in progress.✅
+ * - The progressBar element has already been created for you.✅
+ *  - You need only to modify its "width" style property to align with the request progress.✅
+ * - In your request interceptor, set the width of the progressBar element to 0%.✅
+ *  - This is to reset the progress with each request.✅
+ * - Research the axios onDownloadProgress config option.✅
+ * - Create a function "updateProgress" that receives a ProgressEvent object.✅
+ *  - Pass this function to the axios onDownloadProgress config option in your event handler.✅
+ * - console.log your ProgressEvent object within updateProgess, and familiarize yourself with its structure.✅
+ *  - Update the progress of the request using the properties you are given.✅
+ * - Note that we are not downloading a lot of data, so onDownloadProgress will likely only fire✅
+ *   once or twice per request to this API. This is still a concept worth familiarizing yourself✅
  *   with for future projects.
  */
 
@@ -204,9 +204,9 @@ function updateProgress(progressEvent) {
 }
 
 /**
- * 7. As a final element of progress indication, add the following to your axios interceptors:
- * - In your request interceptor, set the body element's cursor style to "progress."
- * - In your response interceptor, remove the progress cursor style from the body element.
+ * 7. As a final element of progress indication, add the following to your axios interceptors:✅
+ * - In your request interceptor, set the body element's cursor style to "progress."✅
+ * - In your response interceptor, remove the progress cursor style from the body element.✅
  */
 /**
  * 8. To practice posting data, we'll create a system to "favourite" certain images.
@@ -219,8 +219,33 @@ function updateProgress(progressEvent) {
  *   you delete that favourite using the API, giving this function "toggle" functionality.
  * - You can call this function by clicking on the heart at the top right of any image.
  */
+
+const favouritesMap = new Map(); // Stores favourited images and their favourite_id will need later to unfavorite 
+
 export async function favourite(imgId) {
   // your code here
+  try {
+    // If it's already in the map, DELETE it (unfavourite)
+    if (favouritesMap.has(imgId)) {
+      const favId = favouritesMap.get(imgId); // gets the favorite_id
+      await axios.delete(`/favourites/${favId}`); // sends a DELETE request to the DOG API  to remove the image from favorites
+      favouritesMap.delete(imgId); // removes the image from the favoritesMap
+      console.log(`Removed favourite for image ${imgId}`);
+    } else {
+      // If it's not in the map, POST it (favourite)
+      const response = await axios.post("/favourites", {
+        image_id: imgId
+      });
+      const favId = response.data.id; // gets the new favourite_id 
+      favouritesMap.set(imgId, favId); // stores the new favId, imgId is the key
+      console.log(`Favourited image ${imgId} with favId ${favId}`);
+    }
+
+  }
+  catch (error) {
+    console.error("Error toggling favourite:", error); 
+  }
+
 }
 
 /**
