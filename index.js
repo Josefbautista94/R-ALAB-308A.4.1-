@@ -23,18 +23,24 @@ axios.interceptors.request.use((config) => { // hooking into axios request lifec
   console.log("Request sent...");
   config.metadata = { startTime: new Date() }; // adding a custo, property metadata to the request
   // start time requests the exact moment the request data is made
+  progressBar.style.width = "0%"; // Reset
+  document.body.style.cursor = "progress";
   return config; // returns the config object that we modded so axios can continue with the request
 });
 
 // Response interceptor
 axios.interceptors.response.use((response) => {
-    const endTime = new Date(); // catches the current time at the moment the response is recieved 
-    const duration = endTime - response.config.metadata.startTime; // subtracts the previous recorded start time from the end time
-    console.log(`Request Duration: ${duration} ms`);
-    return response; 
-  },
+  const endTime = new Date(); // catches the current time at the moment the response is recieved 
+  const duration = endTime - response.config.metadata.startTime; // subtracts the previous recorded start time from the end time
+  console.log(`Request Duration: ${duration} ms`);
+  document.body.style.cursor = "default";
+  
+  return response;
+},
   (error) => {
     console.error("Request failed:", error);
+    document.body.style.cursor = "default";
+
     return Promise.reject(error);
   }
 );
@@ -108,7 +114,9 @@ async function retrieveInfo(event) { // creating async function to add breeds ch
       params: { //Axios uses this to attach querey parameters to the URL
         limit: 10, // telling the API you want 10 results
         breed_ids: selectedBreedId // sends the selected breed id so I can get images of the specific breed
-      }
+      },
+      onDownloadProgress: updateProgress
+
     });
 
     const doggyData = doggyRes.data;
@@ -166,9 +174,9 @@ async function retrieveInfo(event) { // creating async function to add breeds ch
 
 
 /**
- * 5. Add axios interceptors to log the time between request and response to the console.
- * - Hint: you already have access to code that does this!
- * - Add a console.log statement to indicate when requests begin.
+ * 5. Add axios interceptors to log the time between request and response to the console.✅
+ * - Hint: you already have access to code that does this!✅
+ * - Add a console.log statement to indicate when requests begin.✅
  * - As an added challenge, try to do this on your own without referencing the lesson material.
  */
 
@@ -187,6 +195,13 @@ async function retrieveInfo(event) { // creating async function to add breeds ch
  *   once or twice per request to this API. This is still a concept worth familiarizing yourself
  *   with for future projects.
  */
+
+function updateProgress(progressEvent) {
+  const prog = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+  progressBar.style.width = `${prog}%`
+  console.log(`Download Progress: ${prog}%`)
+
+}
 
 /**
  * 7. As a final element of progress indication, add the following to your axios interceptors:
