@@ -665,35 +665,6 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 /**
- * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab." 🤷🏻‍♂️
- */ /**
- * 4. Change all of your fetch() functions to axios!✅
- * - axios has already been imported for you within index.js.✅
- * - If you've done everything correctly up to this point, this should be simple.✅
- * - If it is not simple, take a moment to re-evaluate your original code.✅
- * - Hint: Axios has the ability to set default headers. Use this to your advantage✅
- *   by setting a default header with your API key so that you do not have to✅
- *   send it manually with all of your requests! You can also set a default base URL!✅
- */ /**
- * 5. Add axios interceptors to log the time between request and response to the console.
- * - Hint: you already have access to code that does this!
- * - Add a console.log statement to indicate when requests begin.
- * - As an added challenge, try to do this on your own without referencing the lesson material.
- */ /**
- * 6. Next, we'll create a progress bar to indicate the request is in progress.
- * - The progressBar element has already been created for you.
- *  - You need only to modify its "width" style property to align with the request progress.
- * - In your request interceptor, set the width of the progressBar element to 0%.
- *  - This is to reset the progress with each request.
- * - Research the axios onDownloadProgress config option.
- * - Create a function "updateProgress" that receives a ProgressEvent object.
- *  - Pass this function to the axios onDownloadProgress config option in your event handler.
- * - console.log your ProgressEvent object within updateProgess, and familiarize yourself with its structure.
- *  - Update the progress of the request using the properties you are given.
- * - Note that we are not downloading a lot of data, so onDownloadProgress will likely only fire
- *   once or twice per request to this API. This is still a concept worth familiarizing yourself
- *   with for future projects.
- */ /**
  * 7. As a final element of progress indication, add the following to your axios interceptors:
  * - In your request interceptor, set the body element's cursor style to "progress."
  * - In your response interceptor, remove the progress cursor style from the body element.
@@ -745,6 +716,8 @@ const API_KEY = "live_gg8mehf3me9mhlKCmwg2Q64GKLDw1LgZrFSMzBzSNB0i4LUFlGOLUhhQOI
         startTime: new Date()
     }; // adding a custo, property metadata to the request
     // start time requests the exact moment the request data is made
+    progressBar.style.width = "0%"; // Reset
+    document.body.style.cursor = "progress";
     return config; // returns the config object that we modded so axios can continue with the request
 });
 // Response interceptor
@@ -752,9 +725,11 @@ const API_KEY = "live_gg8mehf3me9mhlKCmwg2Q64GKLDw1LgZrFSMzBzSNB0i4LUFlGOLUhhQOI
     const endTime = new Date(); // catches the current time at the moment the response is recieved 
     const duration = endTime - response.config.metadata.startTime; // subtracts the previous recorded start time from the end time
     console.log(`Request Duration: ${duration} ms`);
+    document.body.style.cursor = "default";
     return response;
 }, (error)=>{
     console.error("Request failed:", error);
+    document.body.style.cursor = "default";
     return Promise.reject(error);
 });
 /**
@@ -808,7 +783,8 @@ async function retrieveInfo(event) {
             params: {
                 limit: 10,
                 breed_ids: selectedBreedId // sends the selected breed id so I can get images of the specific breed
-            }
+            },
+            onDownloadProgress: updateProgress
         });
         const doggyData = doggyRes.data;
         // //Sendind an api request to fetch 10 random imges of the selected breed
@@ -833,6 +809,40 @@ async function retrieveInfo(event) {
     } catch (error) {
         console.error("Error fetching dog info:", error); // catching any error if it happens
     }
+}
+/**
+ * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab." 🤷🏻‍♂️
+ */ /**
+ * 4. Change all of your fetch() functions to axios!✅
+ * - axios has already been imported for you within index.js.✅
+ * - If you've done everything correctly up to this point, this should be simple.✅
+ * - If it is not simple, take a moment to re-evaluate your original code.✅
+ * - Hint: Axios has the ability to set default headers. Use this to your advantage✅
+ *   by setting a default header with your API key so that you do not have to✅
+ *   send it manually with all of your requests! You can also set a default base URL!✅
+ */ /**
+ * 5. Add axios interceptors to log the time between request and response to the console.✅
+ * - Hint: you already have access to code that does this!✅
+ * - Add a console.log statement to indicate when requests begin.✅
+ * - As an added challenge, try to do this on your own without referencing the lesson material.
+ */ /**
+ * 6. Next, we'll create a progress bar to indicate the request is in progress.
+ * - The progressBar element has already been created for you.
+ *  - You need only to modify its "width" style property to align with the request progress.
+ * - In your request interceptor, set the width of the progressBar element to 0%.
+ *  - This is to reset the progress with each request.
+ * - Research the axios onDownloadProgress config option.
+ * - Create a function "updateProgress" that receives a ProgressEvent object.
+ *  - Pass this function to the axios onDownloadProgress config option in your event handler.
+ * - console.log your ProgressEvent object within updateProgess, and familiarize yourself with its structure.
+ *  - Update the progress of the request using the properties you are given.
+ * - Note that we are not downloading a lot of data, so onDownloadProgress will likely only fire
+ *   once or twice per request to this API. This is still a concept worth familiarizing yourself
+ *   with for future projects.
+ */ function updateProgress(progressEvent) {
+    const prog = Math.round(progressEvent.loaded * 100 / progressEvent.total);
+    progressBar.style.width = `${prog}%`;
+    console.log(`Download Progress: ${prog}%`);
 }
 async function favourite(imgId) {
 // your code here
