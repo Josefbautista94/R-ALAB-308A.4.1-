@@ -2,6 +2,8 @@ window.Buffer = require("buffer").Buffer;
 import * as Carousel from "./Carousel.js";
 import axios from "axios";
 
+
+
 // The breed selection input element.
 const breedSelect = document.getElementById("breedSelect");
 // The information section div element.
@@ -12,44 +14,157 @@ const progressBar = document.getElementById("progressBar");
 const getFavouritesBtn = document.getElementById("getFavouritesBtn");
 
 // Step 0: Store your API key here for reference and easy access.
-const API_KEY = import.meta.env.PUP_API_KEY;
+const API_KEY = "live_gg8mehf3me9mhlKCmwg2Q64GKLDw1LgZrFSMzBzSNB0i4LUFlGOLUhhQOIQhIjab";
+axios.defaults.baseURL = "https://api.thedogapi.com/v1"; // the base URL Axios would use
+axios.defaults.headers.common["x-api-key"] = API_KEY; // using our api key from above ^^ also gets included in every request
+
+// Request interceptor
+axios.interceptors.request.use((config) => { // hooking into axios request lifecycle
+  console.log("Request sent...");
+  config.metadata = { startTime: new Date() }; // adding a custo, property metadata to the request
+  // start time requests the exact moment the request data is made
+  return config; // returns the config object that we modded so axios can continue with the request
+});
+
+// Response interceptor
+axios.interceptors.response.use((response) => {
+    const endTime = new Date(); // catches the current time at the moment the response is recieved 
+    const duration = endTime - response.config.metadata.startTime; // subtracts the previous recorded start time from the end time
+    console.log(`Request Duration: ${duration} ms`);
+    return response; 
+  },
+  (error) => {
+    console.error("Request failed:", error);
+    return Promise.reject(error);
+  }
+);
+
 
 /**
- * 1. Create an async function "initialLoad" that does the following:
- * - Retrieve a list of breeds from the cat API using fetch().
- * - Create new <options> for each of these breeds, and append them to breedSelect.
- *  - Each option should have a value attribute equal to the id of the breed.
- *  - Each option should display text equal to the name of the breed.
- * This function should execute immediately.
+ * 1. Create an async function "initialLoad" that does the following:✅
+ * - Retrieve a list of breeds from the cat API using fetch().✅
+ * - Create new <options> for each of these breeds, and append them to breedSelect.✅
+ *  - Each option should have a value attribute equal to the id of the breed.✅
+ *  - Each option should display text equal to the name of the breed.✅
+ * This function should execute immediately.✅
  */
 
-/**
- * 2. Create an event handler for breedSelect that does the following:
- * - Retrieve information on the selected breed from the cat API using fetch().
- *  - Make sure your request is receiving multiple array items!
- *  - Check the API documentation if you're only getting a single object.
- * - For each object in the response array, create a new element for the carousel.
- *  - Append each of these new elements to the carousel.
- * - Use the other data you have been given to create an informational section within the infoDump element.
- *  - Be creative with how you create DOM elements and HTML.
- *  - Feel free to edit index.html and styles.css to suit your needs, but be careful!
- *  - Remember that functionality comes first, but user experience and design are important.
- * - Each new selection should clear, re-populate, and restart the Carousel.
- * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
- */
+async function initialLoad() {
+  try {
+
+    const response = await axios.get("/breeds"); // this will automatically get prepended to the base url
+    const breeds = response.data; // gets the pasrsed data that was already turned into json!
+
+    // const response = await fetch("https://api.thedogapi.com/v1/breeds"); //This line sends an HTTP GET request to The Doggy API to retrieve a list of dog breeds.
+    // // await pauses this line until the API responds.
+
+    // const breeds = await response.json() //converts the raw response into usable JavaScript (an array of breed objects).
+
+    console.log("Breeds", breeds)
+
+    breeds.forEach((breed) => { // This loop goes through each breed object in the breeds array.
+
+      const option = document.createElement("option"); // creating a new <option> element in JavaScript (for use in a dropdown menu).
+
+      option.value = breed.id; // This is what will be passed when someone selects it in the dropdown.
+
+      option.textContent = breed.name; // Sets the visible text in the dropdown to the name of the breed in example Cane Corso
+
+      breedSelect.appendChild(option) // apppening it to the parent breedSelect
+
+    })
+  } catch (error) {
+    console.error("Error fetching breeds:", error); // throwing an error if something goes wrong
+  }
+}
+
+initialLoad();
 
 /**
- * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab."
+ * 2. Create an event handler for breedSelect that does the following: ✅
+ * - Retrieve information on the selected breed from the dog API using fetch().✅
+ *  - Make sure your request is receiving multiple array items! ✅
+ *  - Check the API documentation if you're only getting a single object. ✅
+ * - For each object in the response array, create a new element for the carousel.✅
+ *  - Append each of these new elements to the carousel. ✅
+ * - Use the other data you have been given to create an informational section within the infoDump element.✅
+ *  - Be creative with how you create DOM elements and HTML.✅
+ *  - Feel free to edit index.html and styles.css to suit your needs, but be careful!✅
+ *  - Remember that functionality comes first, but user experience and design are important.✅
+ * - Each new selection should clear, re-populate, and restart the Carousel.✅
+ * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.✅
+ */
+
+breedSelect.addEventListener("change", retrieveInfo) // event listner for the breed select input element
+
+async function retrieveInfo(event) { // creating async function to add breeds changes
+  try {
+    const selectedBreedId = event.target.value; // Grabs the id for the selected <option> from the drop down
+
+    console.log("Selected Breed : ", selectedBreedId) // used for debugging in the console
+
+
+    const doggyRes = await axios.get("/images/search", { // "/images/search": This is the endpoint path (Axios adds the base URL automatically
+      params: { //Axios uses this to attach querey parameters to the URL
+        limit: 10, // telling the API you want 10 results
+        breed_ids: selectedBreedId // sends the selected breed id so I can get images of the specific breed
+      }
+    });
+
+    const doggyData = doggyRes.data;
+
+    // //Sendind an api request to fetch 10 random imges of the selected breed
+    // const doggyRes = await fetch(`https://api.thedogapi.com/v1/images/search?limit=10&breed_ids=${selectedBreedId}&api_key=${API_KEY}`);
+    // const doggyData = await doggyRes.json(); // converting the doggyData to usable JSON
+
+    Carousel.clear(); // clearing previous photos from the carousel
+    infoDump.innerHTML = ""; // clearing the info section
+
+    doggyData.forEach((item) => { // looping through the 10 images in the doggy data
+      const element = Carousel.createCarouselItem( // using carousel module to build a dom element for each dog
+        item.url, // the url for images 
+        item.breeds[0]?.name || "Dog image", // getting the name of the dog if its available 
+        item.id // gets image id
+      );
+
+      Carousel.appendCarousel(element); // appending everything to carousel
+      Carousel.start(); // initializes the carousel
+    })
+
+    const breedInfo = doggyData[0]?.breeds[0]; // pulling out the breed metadata from the first image's breed info 
+    // and using ? to ensure that it doesnt break if the data is missing
+    if (breedInfo) { // if the meta data exists
+      //injecting breed info such as name, temperament and origin
+      infoDump.innerHTML = `
+      <h2>${breedInfo.name}</h2>
+      <p>${breedInfo.temperament}</p>
+      <p>Origin: ${breedInfo.origin}</p>
+    `;
+    }
+
+  }
+  catch (error) {
+
+    console.error("Error fetching dog info:", error);// catching any error if it happens
+
+  }
+}
+
+
+/**
+ * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab." 🤷🏻‍♂️
  */
 /**
- * 4. Change all of your fetch() functions to axios!
- * - axios has already been imported for you within index.js.
- * - If you've done everything correctly up to this point, this should be simple.
- * - If it is not simple, take a moment to re-evaluate your original code.
- * - Hint: Axios has the ability to set default headers. Use this to your advantage
- *   by setting a default header with your API key so that you do not have to
- *   send it manually with all of your requests! You can also set a default base URL!
+ * 4. Change all of your fetch() functions to axios!✅
+ * - axios has already been imported for you within index.js.✅
+ * - If you've done everything correctly up to this point, this should be simple.✅
+ * - If it is not simple, take a moment to re-evaluate your original code.✅
+ * - Hint: Axios has the ability to set default headers. Use this to your advantage✅
+ *   by setting a default header with your API key so that you do not have to✅
+ *   send it manually with all of your requests! You can also set a default base URL!✅
  */
+
+
 /**
  * 5. Add axios interceptors to log the time between request and response to the console.
  * - Hint: you already have access to code that does this!

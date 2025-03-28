@@ -3,6 +3,7 @@
   "name": "ajax-fetch-and-axios-lab-template",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "scripts": {
     "start": "npx parcel index.html --open",
     "build": "npx parcel build index.html",
