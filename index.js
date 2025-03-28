@@ -18,6 +18,26 @@ const API_KEY = "live_gg8mehf3me9mhlKCmwg2Q64GKLDw1LgZrFSMzBzSNB0i4LUFlGOLUhhQOI
 axios.defaults.baseURL = "https://api.thedogapi.com/v1"; // the base URL Axios would use
 axios.defaults.headers.common["x-api-key"] = API_KEY; // using our api key from above ^^ also gets included in every request
 
+// Request interceptor
+axios.interceptors.request.use((config) => { // hooking into axios request lifecycle
+  console.log("Request sent...");
+  config.metadata = { startTime: new Date() }; // adding a custo, property metadata to the request
+  // start time requests the exact moment the request data is made
+  return config; // returns the config object that we modded so axios can continue with the request
+});
+
+// Response interceptor
+axios.interceptors.response.use((response) => {
+    const endTime = new Date(); // catches the current time at the moment the response is recieved 
+    const duration = endTime - response.config.metadata.startTime; // subtracts the previous recorded start time from the end time
+    console.log(`Request Duration: ${duration} ms`);
+    return response; 
+  },
+  (error) => {
+    console.error("Request failed:", error);
+    return Promise.reject(error);
+  }
+);
 
 
 /**
@@ -90,8 +110,8 @@ async function retrieveInfo(event) { // creating async function to add breeds ch
         breed_ids: selectedBreedId // sends the selected breed id so I can get images of the specific breed
       }
     });
-    
-    const doggyData = doggyRes.data;    
+
+    const doggyData = doggyRes.data;
 
     // //Sendind an api request to fetch 10 random imges of the selected breed
     // const doggyRes = await fetch(`https://api.thedogapi.com/v1/images/search?limit=10&breed_ids=${selectedBreedId}&api_key=${API_KEY}`);
@@ -132,16 +152,16 @@ async function retrieveInfo(event) { // creating async function to add breeds ch
 
 
 /**
- * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab."
+ * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab." 🤷🏻‍♂️
  */
 /**
- * 4. Change all of your fetch() functions to axios!
- * - axios has already been imported for you within index.js.
- * - If you've done everything correctly up to this point, this should be simple.
- * - If it is not simple, take a moment to re-evaluate your original code.
- * - Hint: Axios has the ability to set default headers. Use this to your advantage
- *   by setting a default header with your API key so that you do not have to
- *   send it manually with all of your requests! You can also set a default base URL!
+ * 4. Change all of your fetch() functions to axios!✅
+ * - axios has already been imported for you within index.js.✅
+ * - If you've done everything correctly up to this point, this should be simple.✅
+ * - If it is not simple, take a moment to re-evaluate your original code.✅
+ * - Hint: Axios has the ability to set default headers. Use this to your advantage✅
+ *   by setting a default header with your API key so that you do not have to✅
+ *   send it manually with all of your requests! You can also set a default base URL!✅
  */
 
 
