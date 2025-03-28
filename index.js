@@ -2,6 +2,8 @@ window.Buffer = require("buffer").Buffer;
 import * as Carousel from "./Carousel.js";
 import axios from "axios";
 
+
+
 // The breed selection input element.
 const breedSelect = document.getElementById("breedSelect");
 // The information section div element.
@@ -13,6 +15,9 @@ const getFavouritesBtn = document.getElementById("getFavouritesBtn");
 
 // Step 0: Store your API key here for reference and easy access.
 const API_KEY = "live_gg8mehf3me9mhlKCmwg2Q64GKLDw1LgZrFSMzBzSNB0i4LUFlGOLUhhQOIQhIjab";
+axios.defaults.baseURL = "https://api.thedogapi.com/v1"; // the base URL Axios would use
+axios.defaults.headers.common["x-api-key"] = API_KEY; // using our api key from above ^^ also gets included in every request
+
 
 
 /**
@@ -27,10 +32,13 @@ const API_KEY = "live_gg8mehf3me9mhlKCmwg2Q64GKLDw1LgZrFSMzBzSNB0i4LUFlGOLUhhQOI
 async function initialLoad() {
   try {
 
-    const response = await fetch("https://api.thedogapi.com/v1/breeds"); //This line sends an HTTP GET request to The Doggy API to retrieve a list of dog breeds.
-    // await pauses this line until the API responds.
+    const response = await axios.get("/breeds"); // this will automatically get prepended to the base url
+    const breeds = response.data; // gets the pasrsed data that was already turned into json!
 
-    const breeds = await response.json() //converts the raw response into usable JavaScript (an array of breed objects).
+    // const response = await fetch("https://api.thedogapi.com/v1/breeds"); //This line sends an HTTP GET request to The Doggy API to retrieve a list of dog breeds.
+    // // await pauses this line until the API responds.
+
+    // const breeds = await response.json() //converts the raw response into usable JavaScript (an array of breed objects).
 
     console.log("Breeds", breeds)
 
@@ -75,9 +83,19 @@ async function retrieveInfo(event) { // creating async function to add breeds ch
 
     console.log("Selected Breed : ", selectedBreedId) // used for debugging in the console
 
-    //Sendind an api request to fetch 10 random imges of the selected breed
-    const doggyRes = await fetch(`https://api.thedogapi.com/v1/images/search?limit=10&breed_ids=${selectedBreedId}&api_key=${API_KEY}`);
-    const doggyData = await doggyRes.json(); // converting the doggyData to usable JSON
+
+    const doggyRes = await axios.get("/images/search", { // "/images/search": This is the endpoint path (Axios adds the base URL automatically
+      params: { //Axios uses this to attach querey parameters to the URL
+        limit: 10, // telling the API you want 10 results
+        breed_ids: selectedBreedId // sends the selected breed id so I can get images of the specific breed
+      }
+    });
+    
+    const doggyData = doggyRes.data;    
+
+    // //Sendind an api request to fetch 10 random imges of the selected breed
+    // const doggyRes = await fetch(`https://api.thedogapi.com/v1/images/search?limit=10&breed_ids=${selectedBreedId}&api_key=${API_KEY}`);
+    // const doggyData = await doggyRes.json(); // converting the doggyData to usable JSON
 
     Carousel.clear(); // clearing previous photos from the carousel
     infoDump.innerHTML = ""; // clearing the info section
@@ -125,6 +143,8 @@ async function retrieveInfo(event) { // creating async function to add breeds ch
  *   by setting a default header with your API key so that you do not have to
  *   send it manually with all of your requests! You can also set a default base URL!
  */
+
+
 /**
  * 5. Add axios interceptors to log the time between request and response to the console.
  * - Hint: you already have access to code that does this!
