@@ -209,15 +209,15 @@ function updateProgress(progressEvent) {
  * - In your response interceptor, remove the progress cursor style from the body element.✅
  */
 /**
- * 8. To practice posting data, we'll create a system to "favourite" certain images.
- * - The skeleton of this function has already been created for you.
- * - This function is used within Carousel.js to add the event listener as items are created.
- *  - This is why we use the export keyword for this function.
- * - Post to the cat API's favourites endpoint with the given ID.
- * - The API documentation gives examples of this functionality using fetch(); use Axios!
- * - Add additional logic to this function such that if the image is already favourited,
- *   you delete that favourite using the API, giving this function "toggle" functionality.
- * - You can call this function by clicking on the heart at the top right of any image.
+ * 8. To practice posting data, we'll create a system to "favourite" certain images.✅
+ * - The skeleton of this function has already been created for you.✅
+ * - This function is used within Carousel.js to add the event listener as items are created.✅
+ *  - This is why we use the export keyword for this function.✅
+ * - Post to the cat API's favourites endpoint with the given ID.✅
+ * - The API documentation gives examples of this functionality using fetch(); use Axios!✅
+ * - Add additional logic to this function such that if the image is already favourited,✅
+ *   you delete that favourite using the API, giving this function "toggle" functionality.✅
+ * - You can call this function by clicking on the heart at the top right of any image.✅
  */
 
 const favouritesMap = new Map(); // Stores favourited images and their favourite_id will need later to unfavorite 
@@ -243,7 +243,7 @@ export async function favourite(imgId) {
 
   }
   catch (error) {
-    console.error("Error toggling favourite:", error); 
+    console.error("Error toggling favourite:", error);
   }
 
 }
@@ -257,6 +257,39 @@ export async function favourite(imgId) {
  *    If that isn't in its own function, maybe it should be so you don't have to
  *    repeat yourself in this section.
  */
+
+getFavouritesBtn.addEventListener("click", getFavourites); // Event listener for the Get favourites bttn
+
+async function getFavourites() {
+  try {
+    const response = await axios.get("/favourites"); //Sends a GET request to /favourites via Axios.
+    const favourites = response.data; //Extracts the JSON data from the Axios response.
+
+    console.log("Favourites:", favourites);
+
+    // Clear existing UI!
+    Carousel.clear(); // Clears any existing dog images from the carousel before adding new ones.
+    infoDump.innerHTML = ""; // Clears the info section below the carousel.
+
+    favourites.forEach((fav) => { //Starts looping through each object in the favourites array
+      const element = Carousel.createCarouselItem(
+        fav.image.url, //this is the image itself.
+        "Doggy Dog",
+        fav.image_id //  used for toggling favourites
+      );
+
+      Carousel.appendCarousel(element);
+      Carousel.start();
+
+      favouritesMap.set(fav.image_id, fav.id); // Sync our favouritesMap for toggle functionality
+
+    });
+  } catch (error) {
+    console.error("Error fetching favourites:", error);
+  }
+}
+
+
 
 /**
  * 10. Test your site, thoroughly!
